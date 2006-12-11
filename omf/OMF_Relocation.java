@@ -36,5 +36,9 @@ public abstract class  OMF_Relocation extends OMF_Opcode
     {
         return fNum;
     }
+    /*
+     * compress this relocation record, if possible.
+     * 
+     */
     abstract public OMF_Relocation Compress();
 }
