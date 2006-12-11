@@ -126,7 +126,12 @@ public class OMF_Interseg extends OMF_Relocation
         {
             return new OMF_CInterseg(fNum, fBitshift, fOffset, fSegment, fValue);
         }
-        // TODO generate OMF_CInterseg
         return this;
+    }
+    public boolean Remap(int[] array)
+    {
+        fSegment = array[fSegment];
+        
+        return true;
     }
 }

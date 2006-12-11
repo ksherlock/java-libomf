@@ -88,4 +88,14 @@ public class OMF_CInterseg extends OMF_Relocation
         // TODO Auto-generated method stub
         return this;
     }
+    
+    public boolean Remap(int[] array)
+    {
+        int seg = array[fSegment];
+        if (seg > 0xff) return false;
+        
+        fSegment = seg;
+        
+        return true;
+    }
 }
