@@ -2,10 +2,12 @@
  * Created on Feb 16, 2006
  * Feb 16, 2006 8:58:38 PM
  */
-package omf;
+package omf.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+
+import omf.OMF_Segment;
 
 public class OMF_InputStream extends ByteArrayInputStream implements
         __OMF_Reader

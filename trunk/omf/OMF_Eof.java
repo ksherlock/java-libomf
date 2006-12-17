@@ -8,6 +8,8 @@ package omf;
 
 import java.io.*;
 
+import omf.io.__OMF_Writer;
+
 /**
  *
  * @author Kelvin

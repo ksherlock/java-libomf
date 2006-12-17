@@ -7,6 +7,9 @@ package omf;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import omf.io.__OMF_Reader;
+import omf.io.__OMF_Writer;
+
 /*
  * helper class for loading/saving expressions.
  */

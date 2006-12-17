@@ -10,6 +10,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
 
+import omf.io.OMF_DataOutput;
+import omf.io.OMF_InputStream;
+import omf.io.OMF_OutputStream;
+import omf.io.__OMF_Writer;
+
 /**
  *
  * @author Kelvin
@@ -38,6 +43,7 @@ public class OMF_Segment {
     protected int fEntry;
     protected String fLoadname;
     protected String fSegname;
+    
     
     /** Creates a new instance of OMF */
     public OMF_Segment(InputStream io) {
@@ -242,6 +248,174 @@ public class OMF_Segment {
     	
     }
     
+    public OMF_Segment(DataInput io) {
+        
+        this();
+
+        byte[] tmp;
+        int i;
+        
+        
+        
+        try {
+            fBytecount = io.readInt();
+            fResspace = io.readInt();
+            fLength = io.readInt();
+
+            fType = io.readUnsignedByte();
+            fLablen = io.readUnsignedByte();
+            fNumlen = io.readUnsignedByte();
+            fVersion = io.readUnsignedByte();
+            
+            fBanksize = io.readInt();
+
+            // follwing fields vary by version.
+            int offset = 0;
+            if (fVersion == 0)
+            {
+                fOrg = io.readInt();
+                fAlignment = io.readInt();
+
+                fNumsex = io.readUnsignedByte();
+                io.skipBytes(7);              
+                offset = 0x24;
+                //segname
+                i = fLablen;
+                if (i == 0)
+                {
+                    i = io.readUnsignedByte();
+                    offset++;
+                }
+                
+                tmp = new byte[i];
+                io.readFully(tmp);
+                fSegname = new String(tmp);
+                offset += i;
+            }
+            else if (fVersion == 1 || fVersion == 2)
+            {
+                if (fVersion == 2)
+                {
+                    fKind = io.readUnsignedShort();
+                    io.skipBytes(2);
+                }
+                else
+                {
+                    io.skipBytes(4);     // unused;
+                }
+                
+                fOrg = io.readInt();
+                fAlignment = io.readInt();
+
+                fNumsex = io.readUnsignedByte();
+                fLCBank = io.readUnsignedByte();
+                
+                fSegnum = io.readUnsignedShort();
+                fEntry = io.readInt();
+
+                short dispname;
+                short dispdata;
+                
+                // dispname number - 16 bit             
+                dispname = (short)io.readUnsignedShort();
+            
+                // dispdata - 16 bit
+                dispdata = (short)io.readUnsignedShort();
+                
+                if (fNumsex == 0)
+                {
+                    dispdata = Short.reverseBytes(dispdata);
+                    dispname = Short.reverseBytes(dispname);
+                }
+                
+                // loadname 
+                offset = 0x2c;
+                if (dispname > offset)
+                {
+                    io.skipBytes(dispname - offset);
+                }
+                offset = dispname;
+                tmp = new byte[10];
+                io.readFully(tmp);
+                offset += 10;
+                fLoadname = new String(tmp);
+                // segname - variable;
+                if (fLablen == 0)
+                {
+                    i = io.readUnsignedByte();
+                    offset++;
+                }
+                else i = fLablen;
+                if (i == 0)
+                {
+                    fSegname = "";
+                }
+                else
+                {
+                    tmp = new byte[i];
+                    io.readFully(tmp);
+                    offset += i;
+                    fSegname = new String(tmp);
+                }
+                
+                // read the actual data....
+                if (dispdata > offset)
+                {
+                    io.skipBytes(dispdata - offset);
+                }
+                offset = dispdata;
+            }
+            else
+            {
+                fError = true;
+            }
+            
+            
+
+            if (fNumsex == 0)
+            {
+                fBytecount = Integer.reverseBytes(fBytecount);
+                fResspace = Integer.reverseBytes(fResspace);
+                fLength = Integer.reverseBytes(fLength);
+                fBanksize = Integer.reverseBytes(fBanksize);
+                fOrg = Integer.reverseBytes(fOrg);
+                fAlignment = Integer.reverseBytes(fAlignment);
+                fEntry = Integer.reverseBytes(fEntry);
+                
+                fKind = Short.reverseBytes((short)fKind);
+                fSegnum = Short.reverseBytes((short)fSegnum);
+            }
+  
+            if (fVersion < 2)
+            {
+                fBytecount *= 512;
+                
+                // convert the TYPE to Kind.
+                
+                fKind = fType & 0x0f;
+                int attr = 0;
+                if (fKind == OMF.TYPE_ABSBANK)
+                {
+                    attr |= OMF.KIND_ABSBANK;
+                }
+                // bits 5-7 can be shifted to bits 13-15
+                attr |= ((fType & 0xe0) << 8);
+                fKind |= attr;
+            }           
+            
+            tmp = new byte[fBytecount - offset];
+            io.readFully(tmp);
+            this.ParseOpcodes(tmp);
+        
+            
+        } catch (IOException e) {
+            fError = true;
+        }       
+        
+        
+    }    
+    
+    
     public OMF_Segment()
     {
     	fLength = 0;
@@ -261,7 +435,7 @@ public class OMF_Segment {
     	fEntry = 0;
     	fLoadname = "";
     	fSegname = "";
-        
+
         fError = false;
         fFile = 1;
         fOpcodes = new ArrayList<OMF_Opcode>();
@@ -385,6 +559,9 @@ public class OMF_Segment {
         } // while !done   	
     }
     
+    
+    
+    
     public boolean Save(FileOutputStream io)
     {
         OMF_OutputStream out = new OMF_OutputStream(this);
@@ -449,6 +626,72 @@ public class OMF_Segment {
         
         return true;
     }
+
+    public boolean Save(RandomAccessFile f)
+    {
+        if (fVersion < 2) return false;
+        __OMF_Writer header = new OMF_DataOutput(f, this);
+        
+        try
+        {
+    
+            int offset;
+            long pos = f.getFilePointer();
+            
+            
+            if (fSegname.length() == 0) fSegname = "          ";
+            if (fLoadname.length() == 0) fLoadname = "          ";
+            this.fLength = 0;
+            offset = 0x2c + 10;
+            if (fLablen == 0)
+            {
+                offset += 1 + fSegname.length();
+            }
+            else offset += fLablen;
+            
+            // seek past the header, then write all the opcodes.
+            f.seek(pos + offset);
+            for (OMF_Opcode op : fOpcodes)
+            {
+                fLength += op.CodeSize();
+                op.Save(header);
+            }
+            
+            
+            // calculate the total size, then seek back and write the header.
+            this.fBytecount = (int)(f.getFilePointer() - pos);
+            f.seek(pos);
+            // write the header...
+            header.Write32(fBytecount);
+            header.Write32(fResspace);
+            header.Write32(fLength);
+            header.Write8(0);
+            header.Write8(fLablen);
+            header.Write8(fNumlen);
+            header.Write8(fVersion);
+            header.Write32(fBanksize);
+            header.Write16(fKind);
+            header.Write16(0);
+            header.Write32(fOrg);
+            header.Write32(fAlignment);
+            header.Write8(fNumsex);
+            header.Write8(0);
+            header.Write16(fSegnum);
+            header.Write32(fEntry);
+            header.Write16(0x2c);
+            header.Write16(offset);
+            header.WriteString(fLoadname, 10);
+            header.WriteString(fSegname);
+            
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+        
+        return header.IsOK();
+    }
+   
     
     public ListIterator<OMF_Opcode> Opcodes()
     {
@@ -565,7 +808,7 @@ public class OMF_Segment {
     {
         fOrg = org;
     }
-
+    
     public int Entry()
     {
         return fEntry;

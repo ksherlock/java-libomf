@@ -4,6 +4,9 @@
  */
 package omf;
 
+import omf.io.__OMF_Reader;
+import omf.io.__OMF_Writer;
+
 /*
  * $E3 INTERSEG - This record is used in the relocation dictionary of a load
  * segment, and contains a patch to a long call to an external reference. The

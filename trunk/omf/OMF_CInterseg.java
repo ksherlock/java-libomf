@@ -4,6 +4,9 @@
  */
 package omf;
 
+import omf.io.__OMF_Reader;
+import omf.io.__OMF_Writer;
+
 /*
  * $F6 cINTERSEG – This record is the compressed version of the INTERSEG record.
  * It is identical to the INTERSEG record, except that the offsets are 2 bytes

@@ -8,6 +8,9 @@ package omf;
 
 import java.util.ArrayList;
 
+import omf.io.__OMF_Reader;
+import omf.io.__OMF_Writer;
+
 public class OMF_Equ extends OMF_Local {
 
     private ArrayList fExpr;
