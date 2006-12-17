@@ -4,6 +4,9 @@
  */
 package omf;
 
+import omf.io.__OMF_Reader;
+import omf.io.__OMF_Writer;
+
 /*
  * $F4 ENTRY - This record is used in a run-time library dictionary. It contains
  * a two-byte segment number, followed by a label that is the name of the code

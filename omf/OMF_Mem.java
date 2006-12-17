@@ -4,6 +4,9 @@
  */
 package omf;
 
+import omf.io.__OMF_Reader;
+import omf.io.__OMF_Writer;
+
 /*
  * $E8 MEM - The operand is two absolute NUMLEN byte values specifying an
  * absolute range of memory which must be reserved. This is not needed or

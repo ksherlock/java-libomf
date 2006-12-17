@@ -2,9 +2,11 @@
  * Created on Feb 16, 2006
  * Feb 16, 2006 9:16:13 PM
  */
-package omf;
+package omf.io;
 
 import java.io.ByteArrayOutputStream;
+
+import omf.OMF_Segment;
 
 public class OMF_OutputStream extends ByteArrayOutputStream implements __OMF_Writer
 {

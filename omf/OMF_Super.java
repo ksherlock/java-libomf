@@ -4,6 +4,9 @@
  */
 package omf;
 
+import omf.io.__OMF_Reader;
+import omf.io.__OMF_Writer;
+
 /*
  * $F7 SUPER - Super records contain a series of cRELOC, cINTERSEG and INTERSEG
  * records, compacted into a short, tabular form. The difference between a

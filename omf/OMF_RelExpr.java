@@ -6,6 +6,9 @@ package omf;
 
 import java.util.ArrayList;
 
+import omf.io.__OMF_Reader;
+import omf.io.__OMF_Writer;
+
 /*
  * $EE RELEXPR - the first byte is the number of bytes to generate, and is
  * <=NUMLEN. This is followed by a NUMLEN byte displacement from the current

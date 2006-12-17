@@ -6,6 +6,9 @@
 
 package omf;
 import java.lang.String;
+
+import omf.io.__OMF_Reader;
+import omf.io.__OMF_Writer;
 /**
  *
  * @author Kelvin

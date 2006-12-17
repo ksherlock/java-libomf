@@ -2,7 +2,7 @@
  * Created on Feb 16, 2006
  * Feb 16, 2006 8:53:45 PM
  */
-package omf;
+package omf.io;
 
 public interface __OMF_Writer
 {
@@ -14,6 +14,7 @@ public interface __OMF_Writer
     public void Write32(int n);
     public void WriteNumber(int n);
     public void WriteString(String s);
+    public void WriteString(String s, int length);
     public void WriteBytes(byte[] b);
     public void WriteBytes(byte[] b, int count);
 }

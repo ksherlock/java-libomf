@@ -6,6 +6,8 @@
  */
 package omf;
 
+import omf.io.__OMF_Reader;
+
 /**
  * @author Kelvin
 

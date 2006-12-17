@@ -2,7 +2,7 @@
  * Created on Feb 16, 2006
  * Feb 16, 2006 8:52:38 PM
  */
-package omf;
+package omf.io;
 
 public interface __OMF_Reader
 {
