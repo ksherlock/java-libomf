@@ -26,6 +26,9 @@ public class OMF_Segment {
     private boolean fError;
     private int fFile;
     
+    private boolean fReloc;
+    
+    
     protected int fNumlen;
     protected int fNumsex;
     protected int fAlignment;
@@ -440,6 +443,8 @@ public class OMF_Segment {
         fFile = 1;
         fOpcodes = new ArrayList<OMF_Opcode>();
         
+        fReloc = false;
+        
     }
     
     private void ParseOpcodes(byte[] data)
@@ -474,18 +479,22 @@ public class OMF_Segment {
                 break;
                 
             case OMF.OMF_RELOC:
+                fReloc = true;
                 omf = new OMF_Reloc(in);
                 break;
                 
             case OMF.OMF_CRELOC:
+                fReloc = true;
                 omf = new OMF_CReloc(in);
                 break;
                 
             case OMF.OMF_INTERSEG:
+                fReloc = true;
                 omf = new OMF_Interseg(in);
                 break;
                 
             case OMF.OMF_CINTERSEG:
+                fReloc = true;
                 omf = new OMF_CInterseg(in);
                 break; 
                 
@@ -535,6 +544,7 @@ public class OMF_Segment {
                 break;
                 
             case OMF.OMF_SUPER:
+                fReloc = true;
                 omf = new OMF_Super(in);
                 break;
                 
@@ -703,6 +713,18 @@ public class OMF_Segment {
         {
             fOpcodes.add(op);
             fLength += op.CodeSize();
+            if (fReloc == false)
+            {
+                switch (op.Opcode())
+                {
+                case OMF.OMF_SUPER:
+                case OMF.OMF_RELOC:
+                case OMF.OMF_CRELOC:
+                case OMF.OMF_INTERSEG:
+                case OMF.OMF_CINTERSEG:
+                    fReloc = true;
+                }
+            }
         }
     }
     
